@@ -1,8 +1,7 @@
 # Introduction to Airflow 1	(Day-1)
 ## Prerequisites
 - Activate docker
-
-- Run the Airflow webserver, scheduler, database (on Postgreql) and redis locally via docker-compose.
+- An Airflow instance is composed of a scheduler, an executor, a webserver, and a metadata database. Run the Airflow instance locally via docker-compose.
 
     ```
         source docker/.env
@@ -14,43 +13,46 @@
 
 ## Apache Airflow
 
-Apache Airflow is an open-source workflow management platform, which includes defining, executing, and monitoring workflows. 
+Apache Airflow is an open-source workflow management platform, which includes defining, executing, and monitoring workflows. Workflows are defined using `DAGs` (Directed Acyclic Graphs). In a DAG, there are a set of `Tasks` to be executed.
 
-A workflow can be defined as any sequence of steps taken to accomplish a particular goal. In an ELT pipeline, there are some workflows need to be done: 
-- to move data from one or more sources to our data-warehouse (i.e: Postgresql or Citus Postgresql) and 
-- to run data transformation jobs with dbt, on a scheduled manner. 
+In growing Big Data use cases, Airflow helps to maintain, monitor and stitch together more complex and depending jobs into an end-to-end workflow.
 
-
-In a growing Big Data teams and more complex use cases, Airflow helps to maintain, monitor and stitch together related jobs into an end-to-end workflow.
-
-## Concept of DAG, tasks, DAGRuns, and taskInstances, operator
-
-Airflow works with Python
+## Concept of DAG, Task, and Operator
 
 ![dag-task-operator](./img/airflow__dag-task-operator.png)
 
 - Directed Acyclic Graph (DAG)
-Workflows are defined using DAGs (Directed Acyclic Graphs). in a DAG, there are composed of tasks to be executed.
 
-    - DAGRun
+
+In Airflow, a workflow is defined as a DAG (Directed Acyclic Graph) that contains individual units of work called Tasks. In simple terms, a DAG is a graph with nodes connected via directed edges. Also, there should be no cycles within such a graph. 
+
+Suppose in an ELT pipeline, we define a DAG contains some Tasks, such as: 
+- extract data from one or more sources 
+- load data to our data-warehouse
+- run data transformation
+- send email notification when error happens
+
+![airflow-dag-tasks](./img/airflow__dag_task.png)
+
+Whenever a DAG is triggered a DAGRun is created, so a DAGRun is an instance of the DAG with an execution timestamp. 
+
+- Operator
+Operator is a template or class for performing a specific task. If we want to execute a Python script, we need a `PythonOperator`. If we want to execute Bash command, we need `BashOperator`. There are [built-in operators](https://airflow.apache.org/docs/apache-airflow/stable/_api/airflow/operators/index.html), such as: `EmailOperator`, `EmptyOperator`, etc.
+
+We can also install more operators from [Provider packages](https://airflow.apache.org/docs/apache-airflow-providers/index.html) to further extend Airflow’s functionalities.
 
 
 - Task
+A task is an instantiation of an operator and simply can be thought of as a unit of work that is represented as a node in a DAG.
+
+Whenever a Task is running, a task instance is created. A task instance belongs to DAGRuns, has an associated `execution_date`. Task instances go through various states, such as “running,” “success,” “failed,” “skipped,” “retry,” etc. Each task instance (and task) has a life cycle through which it moves from one state to another.
+
     - TaskInstances
-
-- Operators
-
-    - EmptyOperator
-    - PythonOperator
-    - DbtOperator
-    - AirbyteTriggerSyncOperator (https://docs.airbyte.com/operator-guides/using-the-airflow-airbyte-operator)
-
-
 ## Important commonly used DAG configurations 
 
 
 
-## Create your first DAG example and check it through UI dashboard
+## Create your first Simple DAG example and check it through UI dashboard
 
 
 ## [TASK] TBD
