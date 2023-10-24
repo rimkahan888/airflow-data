@@ -24,28 +24,28 @@ In growing Big Data use cases, Airflow helps to maintain, monitor and stitch tog
 - Directed Acyclic Graph (DAG)
 
 
-In Airflow, a workflow is defined as a DAG (Directed Acyclic Graph) that contains individual units of work called Tasks. In simple terms, a DAG is a graph with nodes connected via directed edges. Also, there should be no cycles within such a graph. 
+    In Airflow, a workflow is defined as a DAG (Directed Acyclic Graph) that contains individual units of work called Tasks. In simple terms, a DAG is a graph with nodes connected via directed edges. Also, there should be no cycles within such a graph. 
 
-Suppose in an ELT pipeline, we define a DAG contains some Tasks, such as: 
-- extract data from one or more sources 
-- load data to our data-warehouse
-- run data transformation
-- send email notification when error happens
+    Suppose in an ELT pipeline, we define a DAG contains some Tasks, such as: 
+    - extract data from one or more sources 
+    - load data to our data-warehouse
+    - run data transformation
+    - send email notification when error happens
 
-![airflow-dag-tasks](./img/airflow__dag_task.png)
+    ![airflow-dag-tasks](./img/airflow__dag_task.png)
 
-Whenever a DAG is triggered a DAGRun is created, so a DAGRun is an instance of the DAG with an execution timestamp. 
+    Whenever a DAG is triggered a DAGRun is created, so a DAGRun is an instance of the DAG with an execution timestamp. 
 
 - Operator
-Operator is a template or class for performing a specific task. If we want to execute a Python script, we need a `PythonOperator`. If we want to execute Bash command, we need `BashOperator`. There are [built-in operators](https://airflow.apache.org/docs/apache-airflow/stable/_api/airflow/operators/index.html), such as: `EmailOperator`, `EmptyOperator`, etc.
+    Operator is a template or class for performing a specific task. If we want to execute a Python script, we need a `PythonOperator`. If we want to execute Bash command, we need `BashOperator`. There are [built-in operators](https://airflow.apache.org/docs/apache-airflow/stable/_api/airflow/operators/index.html), such as: `EmailOperator`, `EmptyOperator`, etc.
 
-We can also install more operators from [Provider packages](https://airflow.apache.org/docs/apache-airflow-providers/index.html) to further extend Airflow’s functionalities.
+    We can also install more operators from [Provider packages](https://airflow.apache.org/docs/apache-airflow-providers/index.html) to further extend Airflow’s functionalities.
 
 
 - Task
-A task is an instantiation of an operator and simply can be thought of as a unit of work that is represented as a node in a DAG.
+    A task is an instantiation of an operator and simply can be thought of as a unit of work that is represented as a node in a DAG.
 
-Whenever a Task is running, a task instance is created. A task instance belongs to DAGRuns, has an associated `execution_date`. Task instances go through various states, such as “running,” “success,” “failed,” “skipped,” “retry,” etc. Each task instance (and task) has a life cycle through which it moves from one state to another.
+    Whenever a Task is running, a task instance is created. A task instance belongs to DAGRuns, has an associated `execution_date`. Task instances go through various states, such as “running,” “success,” “failed,” “skipped,” “retry,” etc. Each task instance (and task) has a life cycle through which it moves from one state to another.
 
 ## Create our first DAG on Airflow 
 
@@ -108,6 +108,9 @@ Whenever a Task is running, a task instance is created. A task instance belongs 
 
 ![airflow-log](./img/airflow_logs.png)
 
+## Create your First Operator
+
+
 ## TASK
 
 1. [TBD] Create DAG that will run in every 3 hours.
@@ -115,9 +118,24 @@ Whenever a Task is running, a task instance is created. A task instance belongs 
 
 # Introduction to Airflow 2	(Day-2)
 
-## Create your First Operator
+## Define Variables, XCom, Hooks, Connection 
 
-## Concept of XCom, Hooks and Connection
+- Variables 
+Variables in Airflow are a key-value store contains settings that can be queried from our tasks and can be set via Airflow dashboard or imported as a JSON file.
+
+![airflow-variables](./img/airflow__variables.png)
+
+- XCom (cross-communication)
+
+Passing data from one `Task`/`Operator` to another. The data to be shared is stored in the database with an associated execution date, task instance, and DAG run by the sending task and then retrieved from the database by the intended recipient task. 
+
+To send and retrieve objects we can use method: `xcom_push()` and `xcom_pull()`.
+
+- Hooks
+
+- Connection
+
+
 
 ## Implement XCom, Hooks and Connection in your DAG
 
@@ -136,7 +154,7 @@ https://www.freecodecamp.org/news/orchestrate-an-etl-data-pipeline-with-apache-a
 
 Setup a DAG script
 - Prepare the dataset (some CSV files or URL)
-- Create DAG to ingest the dataset to our datawarehouse with python
+- Create code to ingest the dataset to our datawarehouse with python
     1. define when the DAG will be run, start_date
     2. define the interval of the DAG
 - Setup Postgresql DB Connection
