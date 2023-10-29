@@ -164,28 +164,45 @@ class HelloWorldOperator(BaseOperator):
     custom_operator_hello_task
 ```
 
-## Define Variables, XCom, Hooks, Connection 
+## Define Airflow Variables with `variables` and `xcom`
 
-- Variables 
+There are several ways to store information in Airflow, such as: 
 
-Variables in Airflow are a key-value store contains settings that can be queried from our tasks and can be set via Airflow dashboard or imported as a JSON file.
+- Airflow `variables` that is used to store information that doesn't change too frequently.
 
-```
+- Airflow `xcom` can be used to pass parameters between `tasks`. Use `xcom` when the parameters are likely to change with each DAG run. 
 
-```
+- Airflow `params` can be used to pass information that is specific to a DAG. 
+
+Now, we are going to learn about airflow `variables` and `xcom`.
+
+- `variables` in Airflow
+
+`variables` are a key-value store that contain settings that can be queried from our `tasks`. `variables` can be set via Airflow dashboard, Airflow CLI, imported as a JSON file or programmatically within an Airflow `tasks`.
 
 ![airflow-variables](./img/airflow__variables.png)
 
-- XCom (cross-communication)
 
-XCom in Airflow is the way to pass data from one `Task`/`Operator` to another. The data to be shared is stored in the database with an associated execution date, task instance, and DAG run by the sending task and then retrieved from the database by the intended recipient task. 
+Here is how to access `variables` programmatically via code:
+
+```
+
+```
+
+
+- `xcom` (cross-communication) in Airflow
+
+`xcom` in Airflow is the way to pass data from one `Task`/`Operator` to another. The data to be shared is stored in the database with an associated execution date, task instance, and DAG run by the sending task and then retrieved from the database by the intended recipient task. 
 
 To send and retrieve objects we can use method: `xcom_push()` and `xcom_pull()`.
+
+
+## Understanding Hooks and Connection 
 
 - Hooks
 
 - Connection
-≥,mn m,./0p980-p8-pl []
+
 
 # Review Task (Day-3)
 

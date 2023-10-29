@@ -1,2 +1,5 @@
-# created by virtualenv automatically
-*
+docker/logs
+docker/dags/__pycache__
+docker/plugins/operators/__pycache__
+*.cfg
+.DS_Store
