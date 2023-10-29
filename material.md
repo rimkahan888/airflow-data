@@ -1,3 +1,13 @@
+# Outline
+
+1. [Introduction to Airflow 1 (Day-1)](#introduction-to-airflow-1-day-1)
+
+2. [Introduction to Airflow 2 (Day-2)](#introduction-to-airflow-2-day-2)
+
+3. [Review Task (Day-3)](#review-task-day-3)
+
+4. [Schedule your data pipeline (Day-4)](#schedule-your-data-pipeline-day-4)
+
 # Introduction to Airflow 1	(Day-1)
 ## Prerequisites
 - Activate docker
