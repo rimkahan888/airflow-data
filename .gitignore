@@ -1,4 +1,2 @@
-docker/logs
-.DS_Store
-docker/dags/__pycache__
-docker/logs/
+# created by virtualenv automatically
+*

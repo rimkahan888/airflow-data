@@ -13,6 +13,10 @@ dag = DAG(
         catchup=False
     )
 
-operator_hello_world = PythonOperator(task_id='hello_task', python_callable=print_hello, dag=dag)
+operator_hello_world = PythonOperator(
+    task_id='hello_task', 
+    python_callable=print_hello, 
+    dag=dag
+)
 
 operator_hello_world

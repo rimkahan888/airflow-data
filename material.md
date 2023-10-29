@@ -85,13 +85,13 @@ In growing Big Data use cases, Airflow helps to maintain, monitor and stitch tog
             )
     ```
 
-- Next, we define the operator and call it the hello_operator. In essence, this uses the in-built PythonOperator to call our print_hello function. We also provide a task_id to this operator.
+- Next, we define the task and call it the `hello_operator` task. The task uses the in-built `PythonOperator` to call our `print_hello` function. We also provide a `task_id` to this task.
 
     ```
         operator_hello_world = PythonOperator(task_id='hello_task', python_callable=print_hello, dag=dag)
     ```
 
-- The last statement specifies the order of the operators. In this case, we have only one operator, no upstream or downstream task.
+- The last statement specifies the order of the task. In this case, we have only one task, no upstream or downstream task.
     ```
         operator_hello_world
     ```
@@ -108,9 +108,6 @@ In growing Big Data use cases, Airflow helps to maintain, monitor and stitch tog
 
 ![airflow-log](./img/airflow_logs.png)
 
-## Create your First Operator
-
-
 ## TASK
 
 1. [TBD] Create DAG that will run in every 3 hours.
@@ -118,28 +115,77 @@ In growing Big Data use cases, Airflow helps to maintain, monitor and stitch tog
 
 # Introduction to Airflow 2	(Day-2)
 
+## Create your First Operator
+
+Now we’ll create our own operator that extends previous HelloWorld example, we’ll call the HelloWorldOperator. It will print a message on the console with the argument passed into it. The code can be found here: 
+- [Operator code](./docker/plugins/operators/hello_operator.py)
+- [DAG code](./docker/dags/hello_world_operator.py)
+
+- Let's go through the [operator code](./docker/plugins/operators/hello_operator.py). First, create a sub directory `operators` under `plugins`. Then, create a file named `hello_operator.py`. 
+
+- All operators are derived from the `BaseOperator` class. The code for our `HelloWorldOperator` appears below.
+
+```
+class HelloWorldOperator(BaseOperator):
+    def __init__(self, param1, param2, *args, **kwargs) -> None:
+        self.param1 = param1
+        self.param2 = param2
+        super(HelloWorldOperator, self).__init__(*args, **kwargs)
+
+
+```
+
+- The line that contains `super` function is used to refer to the `BaseOperator` class or `HelloWorldOperator`
+
+- The main logic of our operator is in the `execute` method. The `HelloWorldOperator` will simply print a message to a console.
+
+```
+    def execute(self, context):
+        print(f'Hello World from Operator: {self.param1} {self.param2}')
+```
+
+- Now, we can import our custom operator to the DAG. Let's runthrough to our [DAG code](./docker/dags/hello_world_operator.py).
+
+- The DAG declaration is similar with the previous example. We will use our custom `HelloWorldOperator` operator to print message to the console. Operator helps us to avoid repetition function.
+
+```
+    custom_operator_hello_task = HelloWorldOperator(
+        param1='This is an example operator by', 
+        param2='alterra-student',
+        task_id='hello_world_task', 
+        dag=dag
+    )
+
+```
+
+- Next, specify the order of the task.
+
+```
+    custom_operator_hello_task
+```
+
 ## Define Variables, XCom, Hooks, Connection 
 
 - Variables 
+
 Variables in Airflow are a key-value store contains settings that can be queried from our tasks and can be set via Airflow dashboard or imported as a JSON file.
+
+```
+
+```
 
 ![airflow-variables](./img/airflow__variables.png)
 
 - XCom (cross-communication)
 
-Passing data from one `Task`/`Operator` to another. The data to be shared is stored in the database with an associated execution date, task instance, and DAG run by the sending task and then retrieved from the database by the intended recipient task. 
+XCom in Airflow is the way to pass data from one `Task`/`Operator` to another. The data to be shared is stored in the database with an associated execution date, task instance, and DAG run by the sending task and then retrieved from the database by the intended recipient task. 
 
 To send and retrieve objects we can use method: `xcom_push()` and `xcom_pull()`.
 
 - Hooks
 
 - Connection
-
-
-
-## Implement XCom, Hooks and Connection in your DAG
-
-## [TASK] TBD
+≥,mn m,./0p980-p8-pl []
 
 # Review Task (Day-3)
 
