@@ -4,7 +4,7 @@
 
 2. [Introduction to Airflow 2 (Day-2)](#introduction-to-airflow-2-day-2)
 
-3. [Review Task (Day-3)](#review-task-day-3)
+3. [Schedule Our Data Pipeline (Day-3)](#schedule-our-data-pipeline-day-3)
 
 4. [Schedule your data pipeline (Day-4)](#schedule-your-data-pipeline-day-4)
 
@@ -199,6 +199,8 @@ This variable is stored in metadata store.
 
 Here is how to access `variables` from a DAG:
 
+[code](./docker/dags/get_var_example.py)
+
 ```
     book_entities_var = Variable.get("book_entities", deserialize_json=True)
     program_name_var = Variable.get("program_name")
@@ -214,9 +216,9 @@ The console prints out the variable:
 
 <<IMAGE>>
 
-## TASK: 
-
 Now, let's create a looping task from variables. Create a JSON variable with value: 
+
+[code](./docker/dags/loop_print_var_example.py)
 
 ```
 {
@@ -231,7 +233,7 @@ Now, let's create a looping task from variables. Create a JSON variable with val
 looping_task_var = Variable.get("looping_task", deserialize_json=True)
 ```
 
-TBD
+[TBD] explanation 
 
 - `xcom` (cross-communication) in Airflow
 
@@ -253,8 +255,11 @@ To send and retrieve objects we can use method: `xcom_push()` and `xcom_pull()`.
 
 ### Using Native PythonOperator to pass xcoms
 
+[code](./docker/dags/xcom_example_native.py)
 
 ### Using TaskFlow API (decorator) to pass xcoms
+
+[code](./docker/dags/xcom_example_decorator.py)
 
 see list of xcom in admin > xcom
 
@@ -273,23 +278,29 @@ Some built-in hook are: `HTTPHook`, `S3Hook`, `PostgresHook`, `MysqlHook`, `Slac
 The difference from `operator` is, operator provides a way to create tasks that may or may not communicate with some external services, while `hook` are reusable block that manage interaction with external services.
 
 Example Hook: 
-- insert data to postgresql with PostgresHook
+- [TBD] insert data to postgresql with PostgresHook
 
 - Connection
 
 We need Airflow `connection` to make the DAG be able to interact with an external tools (http, AWS, GCP or dbt service). A connection consist of a set of parameters: username, password, host, etc. with a unique `ConnectionID`
 
-- Create account in `https://gender-api.com/v2`
-
 There are 2 ways to define a Connection: 
 - In the Airflow metadata database (using the CLI or the UI)
 When you create a Connection in the database, each time a task needs this Connection, it requests the database. If you have many tasks, that can drastically increase the workload on your database.
-
 
 - In an Environment Variables
 With Connections in Environment Variables, the task doesn't need to request the database. Airflow checks if the corresponding Connection exists and grabs it without accessing the database. Again, at scale, this can help reduce the number of requests on your database.
 
 On top of that, Connections defined in Environment Variables do not show up in the Airflow UI or using airflow connection list. 
+
+Now, let's create a DAG that call an API to to predict gender based on name via [gender-api](https://gender-api.com/v2), then print the result to the console. 
+We will implement Airflow connection and SimpleHTTPOperator on it.
+
+Steps: 
+- Create account with your email on `https://gender-api.com/v2`
+- Generate bearer token
+- Go to Airflow dashboard, then add new connection.
+[TBD]
 
 ### TASK
 - Create data pipeline that extract data from gender-api with SimpleHTTPOperator 
@@ -299,9 +310,7 @@ On top of that, Connections defined in Environment Variables do not show up in t
 
 In this section, we are going to implement scheduling for our ETL pipeline that we have learned.
 
-https://docs.astronomer.io/learn/dag-best-practices
-
-How to decompose dag based on its best practice: 
+How to decompose dag based on its best practice: https://docs.astronomer.io/learn/dag-best-practices
 
 ## Understand how to integrate a data pipeline into airflow
 
