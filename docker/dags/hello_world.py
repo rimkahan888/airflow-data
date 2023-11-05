@@ -6,7 +6,7 @@ def print_hello():
     return 'Hello world from first Airflow DAG!'
 
 dag = DAG(
-        'hello_world', 
+        'alterra_hello_world', 
         description='Hello World DAG',
         schedule_interval='* * * * *',
         start_date=datetime(2022, 10, 21), 

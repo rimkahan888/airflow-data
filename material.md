@@ -192,34 +192,116 @@ Now, we are going to learn about airflow `variables` and `xcom`.
 
 ![airflow-variables](./img/airflow__variables.png)
 
+Let's create our variables by clicking on Admin > Variables, then add a new variable.
+This variable is stored in metadata store.
 
-Here is how to access `variables` programmatically via code:
+<<IMAGE>>
+
+Here is how to access `variables` from a DAG:
+
+```
+    book_entities_var = Variable.get("book_entities", deserialize_json=True)
+    program_name_var = Variable.get("program_name")
+```
+Then, lets' just print the variables to the console
+
+```
+    print(f'Print variables, program_name {program_name_var}')
+    print(f'Print variables, book_entities  {book_entities_var}')
+```
+
+The console prints out the variable: 
+
+<<IMAGE>>
+
+## TASK: 
+
+Now, let's create a looping task from variables. Create a JSON variable with value: 
+
+```
+{
+    "task_name" : ["task_a", "task_b", "task_c"]
+}
 
 ```
 
+
+
+```
+looping_task_var = Variable.get("looping_task", deserialize_json=True)
 ```
 
+TBD
 
 - `xcom` (cross-communication) in Airflow
 
 `xcom` in Airflow is the way to pass data from one `Task`/`Operator` to another. The data to be shared is stored in the database with an associated execution date, task instance, and DAG run by the sending task and then retrieved from the database by the intended recipient task. 
 
+- we push a variable in a task and pull the variable from another task. the variable is stored in an airflow metadabase in postgres, with the limit size of 1 GB.
+
+- xcom has many properties: 
+    - key: identifier
+    - value: value (must be JSON serializable)
+    - task_id: from which `task` xcom was created
+    - dag_id: from which `DAG` xcom was created
+    - timestamp: when the xcom was created
+    - logical_date/execution_date: DAG Run data_interval_start
+
+xcom are not designed to pass large dataset.
+
 To send and retrieve objects we can use method: `xcom_push()` and `xcom_pull()`.
 
+### Using Native PythonOperator to pass xcoms
 
-## Understanding Hooks and Connection 
 
-- Hooks
+### Using TaskFlow API (decorator) to pass xcoms
+
+see list of xcom in admin > xcom
+
+
+## TASKS
+- suppose we define a new task that push a variable to xcom, how to pull multiple values at once?
+
+
+## Understanding Hook and Connection 
+
+- Hook
+A hook is an abstraction of a specific API that allows Airflow to interact with an external system. To use a hook, you typically need a conn_id from `Connections` to connect with an external system. For example, the `PostgreHook` automatically looks for the Connection with a conn_id of postgres_default if you don’t pass one in.
+
+Some built-in hook are: `HTTPHook`, `S3Hook`, `PostgresHook`, `MysqlHook`, `SlackHook`, etc.
+
+The difference from `operator` is, operator provides a way to create tasks that may or may not communicate with some external services, while `hook` are reusable block that manage interaction with external services.
+
+Example Hook: 
+- insert data to postgresql with PostgresHook
 
 - Connection
 
+We need Airflow `connection` to make the DAG be able to interact with an external tools (http, AWS, GCP or dbt service). A connection consist of a set of parameters: username, password, host, etc. with a unique `ConnectionID`
 
-# Review Task (Day-3)
+- Create account in `https://gender-api.com/v2`
+
+There are 2 ways to define a Connection: 
+- In the Airflow metadata database (using the CLI or the UI)
+When you create a Connection in the database, each time a task needs this Connection, it requests the database. If you have many tasks, that can drastically increase the workload on your database.
 
 
-# Schedule your data pipeline (Day-4)
+- In an Environment Variables
+With Connections in Environment Variables, the task doesn't need to request the database. Airflow checks if the corresponding Connection exists and grabs it without accessing the database. Again, at scale, this can help reduce the number of requests on your database.
+
+On top of that, Connections defined in Environment Variables do not show up in the Airflow UI or using airflow connection list. 
+
+### TASK
+- Create data pipeline that extract data from gender-api with SimpleHTTPOperator 
+- Load data to postgresql with PostgresHook
+
+# Schedule Our Data Pipeline (Day-3)
 
 In this section, we are going to implement scheduling for our ETL pipeline that we have learned.
+
+https://docs.astronomer.io/learn/dag-best-practices
+
+How to decompose dag based on its best practice: 
 
 ## Understand how to integrate a data pipeline into airflow
 
@@ -241,6 +323,9 @@ Setup a DAG script
 - Test the workflows
 
 ## Scheduling ingestion code with PythonOperator
+
+
+# Schedule Our Data Pipeline (Day-4)
 
 ## Scheduling dbt code with BashOperator
 

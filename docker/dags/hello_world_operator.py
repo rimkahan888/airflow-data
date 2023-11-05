@@ -3,7 +3,7 @@ from airflow import DAG
 from operators.hello_operator import HelloWorldOperator
 
 dag = DAG(
-        'hello_world_with_operator',
+        'alterra_hello_world_with_operator',
         schedule_interval='@once',
         start_date=datetime(2022, 10, 21), 
         catchup=False
