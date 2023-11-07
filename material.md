@@ -186,39 +186,58 @@ There are several ways to store information in Airflow, such as:
 
 Now, we are going to learn about airflow `variables` and `xcom`.
 
-- `variables` in Airflow
+### `variables` in Airflow
 
-`variables` are a key-value store that contain settings that can be queried from our `tasks`. `variables` can be set via Airflow dashboard, Airflow CLI, imported as a JSON file or programmatically within an Airflow `tasks`.
+- `variables` are a key-value store that contain settings that can be queried from our `tasks`. `variables` can be set via Airflow dashboard, Airflow CLI, imported as a JSON file or programmatically within an Airflow `tasks`.
 
 ![airflow-variables](./img/airflow__variables.png)
 
-Let's create our variables by clicking on Admin > Variables, then add a new variable.
-This variable is stored in metadata store.
+- Let's implement `variables` in our DAG. In the first example, we are going to access `variables` from a DAG programmatically and then print the `variables` to the console. The code can be found [here](./docker/dags/get_var_example.py).
 
-<<IMAGE>>
+- First of all, create our variables by clicking on Admin > Variables, then add a new variable. This variable is stored in metadata store.
 
-Here is how to access `variables` from a DAG:
+![airflow-variable-button](./img/airflow__variables_button.png)
 
-[code](./docker/dags/get_var_example.py)
+![airflow-add-variable](./img/airflow__add_variables.png)
+
+- Create `book_entities` variable that contains a json value
+
+```
+    {
+        "title": "book-title-example",
+        "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras sodales dui elit, sed venenatis magna pellentesque sit amet. Praesent sollicitudin enim et lacus rhoncus finibus. Integer interdum sed sem ut interdum. Nullam sagittis magna felis, et feugiat diam pellentesque a.",
+        "isbn": null,
+        "extension": "pdf"
+    }
+```
+
+- Then, `program_name` variable that contains text value `alterra material: learning variable`
+
+- The code below retrieves the Airflow `variables` and deserializes json value.
 
 ```
     book_entities_var = Variable.get("book_entities", deserialize_json=True)
     program_name_var = Variable.get("program_name")
 ```
-Then, lets' just print the variables to the console
+
+- Then, lets' print out the variables to the console.
 
 ```
     print(f'Print variables, program_name {program_name_var}')
     print(f'Print variables, book_entities  {book_entities_var}')
 ```
 
-The console prints out the variable: 
+- Run the DAG, then go to the console and see what the variables are printed out. 
 
-<<IMAGE>>
+![print-airflow-var-in-console](./img/airflow__get_var_example.png)
 
-Now, let's create a looping task from variables. Create a JSON variable with value: 
+- The console
 
-[code](./docker/dags/loop_print_var_example.py)
+![airflow-console](./img/airflow__get_var_console.png)
+
+- In the next example, let's create a little bit advance example. We are going to generate `tasks` based on the array value in `variable`. The code can be found [here](./docker/dags/loop_print_var_example.py).
+
+- First, let's define a JSON variable named `looping_task` with value: 
 
 ```
 {
@@ -227,29 +246,59 @@ Now, let's create a looping task from variables. Create a JSON variable with val
 
 ```
 
-
+- The goal is to generate 3 `tasks` named: `task_a`, `task_b` and `task_c`. Each task will print out the task name. In the DAG, define a function `print_var(**kwargs)` that will print out a value passes via `kwargs`.
 
 ```
-looping_task_var = Variable.get("looping_task", deserialize_json=True)
+    def print_var(**kwargs):
+        print(f'Print variables from kwargs {kwargs["task"]}')
+
 ```
 
-[TBD] explanation 
+- Retrieve the airflow `variable` named `looping_task` and then deserialize the json value.
 
-- `xcom` (cross-communication) in Airflow
+```
+    looping_tasks_var = Variable.get("looping_task", deserialize_json=True)["task_name"]
+
+```
+
+- Iterate over the `looping_tasks_var`, then execute the `print_var` function via `PythonOperator`.
+
+```
+    for task_name in looping_tasks_var:
+        PythonOperator(
+            task_id=f'loop_var_{task_name}',
+            python_callable=print_var,
+            op_kwargs={
+                "task": task_name
+            }
+        )
+```
+
+- `op_kwargs` will pass the variable to the python function in `python_callable` value.
+
+- In the airflow dashboard, find a DAG named `alterra_loop_print_var_examples`, then we can see there are 3 tasks created based on the arrays defined in airflow `variables`.
+
+![generated-tasks](./img/airflow__generate_tasks.png)
+
+- Let's trigger run the DAG. After the DAG run completelt, choose a random task, let's say `loop_var_task_b` task, then see the console.
+
+![console-task-b](./img/airflow__generate_task_console.png)
+
+### `xcom` (cross-communication) in Airflow
 
 `xcom` in Airflow is the way to pass data from one `Task`/`Operator` to another. The data to be shared is stored in the database with an associated execution date, task instance, and DAG run by the sending task and then retrieved from the database by the intended recipient task. 
 
 - we push a variable in a task and pull the variable from another task. the variable is stored in an airflow metadabase in postgres, with the limit size of 1 GB.
 
-- xcom has many properties: 
-    - key: identifier
-    - value: value (must be JSON serializable)
-    - task_id: from which `task` xcom was created
-    - dag_id: from which `DAG` xcom was created
-    - timestamp: when the xcom was created
-    - logical_date/execution_date: DAG Run data_interval_start
+- `xcom` has many properties: 
+    - `key`: identifier
+    - `value`: value of the `xcom` (must be JSON serializable)
+    - `task_id`: from which `task` `xcom` was created
+    - `dag_id`: from which `DAG` `xcom` was created
+    - `timestamp`: when the `xcom` was created
+    - `logical_date`/`execution_date`: DAG Run data_interval_start
 
-xcom are not designed to pass large dataset.
+`xcom` are not designed to pass large dataset.
 
 To send and retrieve objects we can use method: `xcom_push()` and `xcom_pull()`.
 
@@ -268,30 +317,27 @@ see list of xcom in admin > xcom
 - suppose we define a new task that push a variable to xcom, how to pull multiple values at once?
 
 
-## Understanding Hook and Connection 
+## Understanding `Hook` and `Connection` 
 
-- Hook
-A hook is an abstraction of a specific API that allows Airflow to interact with an external system. To use a hook, you typically need a conn_id from `Connections` to connect with an external system. For example, the `PostgreHook` automatically looks for the Connection with a conn_id of postgres_default if you don’t pass one in.
+### Airflow `Hook`
+A `hook` is an abstraction of a specific API that allows Airflow to interact with an external system. To use a `hook`, you typically need a `conn_id` from `Connections` to connect with an external system. For example, the `PostgreHook` automatically looks for the Connection with a `conn_id` of postgres_default if you don’t pass one in.
 
 Some built-in hook are: `HTTPHook`, `S3Hook`, `PostgresHook`, `MysqlHook`, `SlackHook`, etc.
 
-The difference from `operator` is, operator provides a way to create tasks that may or may not communicate with some external services, while `hook` are reusable block that manage interaction with external services.
+The difference from `operator` is, `operator` provides a way to create tasks that may or may not communicate with some external services, while `hook` are reusable block that manage interaction with external services.
 
-Example Hook: 
-- [TBD] insert data to postgresql with PostgresHook
+Example of `hook`: 
+- [TBD] insert data to postgresql with `PostgresHook`
 
-- Connection
+### Airflow `connection`
 
-We need Airflow `connection` to make the DAG be able to interact with an external tools (http, AWS, GCP or dbt service). A connection consist of a set of parameters: username, password, host, etc. with a unique `ConnectionID`
+We need Airflow `connection` to make the DAG be able to interact with an external tools (http, AWS, GCP or dbt service). A `connection` consists of a set of parameters, such as: username, password, host, etc. with a unique `ConnectionID`
 
-There are 2 ways to define a Connection: 
-- In the Airflow metadata database (using the CLI or the UI)
-When you create a Connection in the database, each time a task needs this Connection, it requests the database. If you have many tasks, that can drastically increase the workload on your database.
+There are 2 ways to define a `connection`: 
 
-- In an Environment Variables
-With Connections in Environment Variables, the task doesn't need to request the database. Airflow checks if the corresponding Connection exists and grabs it without accessing the database. Again, at scale, this can help reduce the number of requests on your database.
+    - In the Airflow metadata database (using the CLI or the UI). When you create a `connection` in the database, each time a task needs this `connection`, it requests the database. If you have many tasks, that can drastically increase the workload on your database.
 
-On top of that, Connections defined in Environment Variables do not show up in the Airflow UI or using airflow connection list. 
+    - In an Environment Variables. With `connection` in Environment Variables, the task doesn't need to request the database. Airflow checks if the corresponding `connection` exists and grabs it without accessing the database. Again, at scale, this can help reduce the number of requests on your database.On top of that, `connection` defined in Environment Variables do not show up in the Airflow UI or using airflow `connection` list. 
 
 Now, let's create a DAG that call an API to to predict gender based on name via [gender-api](https://gender-api.com/v2), then print the result to the console. 
 We will implement Airflow connection and SimpleHTTPOperator on it.
@@ -300,6 +346,7 @@ Steps:
 - Create account with your email on `https://gender-api.com/v2`
 - Generate bearer token
 - Go to Airflow dashboard, then add new connection.
+
 [TBD]
 
 ### TASK

@@ -6,7 +6,7 @@ from airflow.models import Variable
 with DAG(
     'alterra_loop_print_var_examples', 
     description='Loop Print Variables Example DAG',
-    schedule_interval='1 * * * *',
+    schedule_interval=None,
     start_date=datetime(2022, 10, 21), 
     catchup=False
 ) as dag:
