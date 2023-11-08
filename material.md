@@ -1,15 +1,19 @@
 # Outline
 
-1. [[Day-1] Introduction to Airflow 1](#day-1-introduction-to-airflow-1)
+1. [[Day-1] Introduction to Airflow: `DAG`, `Task` and `Operator`](#day-1-introduction-to-airflow-1)
 
-2. [[Day-2] Introduction to Airflow 2](#introduction-to-airflow-2-day-2)
+2. [[Day-2] Introduction to Airflow: ](#introduction-to-airflow-2-day-2)
 
-3. [[Day-3] Schedule Our Data Pipeline](#schedule-our-data-pipeline-day-3)
+3. [[Day-3] Introduction to Airflow: ](#introduction-to-airflow-2-day-2)
 
-4. [[Day-4]Schedule your data pipeline](#schedule-your-data-pipeline-day-4)
+4. [[Day-4] Schedule an End-to-End Data Pipeline](#schedule-our-data-pipeline-day-3)
 
-# [Day-1] Introduction to Airflow 1
+5. [[Day-5]Schedule your data pipeline](#schedule-your-data-pipeline-day-4)
+
+# [Day-1] Introduction to Airflow: `DAG`, `Task` and `Operator`
+
 ## Prerequisites
+- Installed DBeaver
 - Activate docker
 - An Airflow instance is composed of a scheduler, an executor, a webserver, and a metadata database. Run the Airflow instance locally via docker-compose.
 
@@ -118,13 +122,6 @@ In growing Big Data use cases, Airflow helps to maintain, monitor and stitch tog
 
 ![airflow-log](./img/airflow_logs.png)
 
-## [Day-1] TASK
-
-1. [TBD] Create DAG that will run in every 3 hours.
-2. [TBD] Create the upstream task and downstream task.
-
-# [Day-2] Introduction to Airflow 2
-
 ## Create your First Operator
 
 Now we’ll create our own operator that extends previous HelloWorld example, we’ll call the HelloWorldOperator. It will print a message on the console with the argument passed into it. The code can be found here: 
@@ -173,6 +170,13 @@ class HelloWorldOperator(BaseOperator):
 ```
     custom_operator_hello_task
 ```
+
+## [Day-1] TASK
+
+1. Create DAG that run in every 5 hours.
+2. [TBD] 
+
+# [Day-2] Introduction to Airflow: `variables` and `xcom`
 
 ## Define Airflow Variables with `variables` and `xcom`
 
@@ -364,6 +368,9 @@ Now, we are going to learn about airflow `variables` and `xcom`.
 1. Suppose we define a new task that push a variable to xcom.
 2. How to pull multiple values at once?
 
+
+# [Day-3] Introduction to Airflow: `Connection` and `Hook`
+
 ## Understanding `Connection` and `Hook`
 
 ### Airflow `connection`
@@ -477,11 +484,10 @@ identify_name = SimpleHttpOperator(
 
 
 ## [Day-3] TASKS
-- Create data pipeline that extract data from gender-api with SimpleHTTPOperator 
-- Load data to postgresql with PostgresHook
+- Create data pipeline that predict multiple names from gender-api with SimpleHTTPOperator 
+- Load the prediction result to table `gender_name_prediction` postgresql with PostgresHook
 
-
-# [Day-3] Schedule an End-to-End Data Pipeline
+# [Day-4] Schedule an End-to-End Data Pipeline
 
 In this section, we are going to implement scheduling for our ETL pipeline that we have learned.
 
@@ -509,7 +515,7 @@ Setup a DAG script
 ## Scheduling ingestion code with PythonOperator
 
 
-# [Day-4] Schedule an End-to-End Data Pipeline
+# [Day-5] Schedule an End-to-End Data Pipeline
 
 ## Scheduling dbt code with BashOperator
 
