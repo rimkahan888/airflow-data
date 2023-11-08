@@ -286,36 +286,83 @@ Now, we are going to learn about airflow `variables` and `xcom`.
 
 ### `xcom` (cross-communication) in Airflow
 
-`xcom` in Airflow is the way to pass data from one `Task`/`Operator` to another. The data to be shared is stored in the database with an associated execution date, task instance, and DAG run by the sending task and then retrieved from the database by the intended recipient task. 
+- `xcom` in Airflow is the way to pass data from one `Task`/`Operator` to another. 
 
-- we push a variable in a task and pull the variable from another task. the variable is stored in an airflow metadabase in postgres, with the limit size of 1 GB.
+![airflow-xcom-flow](./img/airflow__xcom.jpg)
 
-- `xcom` has many properties: 
-    - `key`: identifier
-    - `value`: value of the `xcom` (must be JSON serializable)
-    - `task_id`: from which `task` `xcom` was created
-    - `dag_id`: from which `DAG` `xcom` was created
-    - `timestamp`: when the `xcom` was created
-    - `logical_date`/`execution_date`: DAG Run data_interval_start
+- We push a variable in a task (method `xcom_push()`) and pull the variable from another task (method `xcom_pull()`). 
 
-`xcom` are not designed to pass large dataset.
+- The variable is stored in an airflow metadabase in postgres, with the limit size of 1 GB. Therefore, `xcom` is not designed to pass large dataset.
 
-To send and retrieve objects we can use method: `xcom_push()` and `xcom_pull()`.
+- The `xcom` variable is stored in the airflow meta database with an associated execution date, task instance, and DAG run by the sending task and then retrieved from the database by the intended recipient task.
 
-### Using Native PythonOperator to pass xcoms
+- The `xcom` implementation can be seen in this [code](./docker/dags/xcom_example_native.py). Inside the DAG, we can see 2 python functions respectively: 
 
-[code](./docker/dags/xcom_example_native.py)
+- `push_var_from_task_a` pushes a variable to database
 
-### Using TaskFlow API (decorator) to pass xcoms
+```
+    def push_var_from_task_a(ti=None):
+        ti.xcom_push(key='book_title', value='Data Engineering 101')
+```
 
-[code](./docker/dags/xcom_example_decorator.py)
+- `get_var_from_task_a` method retrieves a variable and print to the console.
 
-see list of xcom in admin > xcom
+```
+    def get_var_from_task_a(ti=None):
+        book_title = ti.xcom_pull(task_ids='push_var_from_task_a', key='book_title')
+        print(f'print book_title variable from xcom: {book_title}')
+```
+
+- Execute python function via `PythonOperator`
+
+```
+    push_var_from_task_a_task = PythonOperator(
+        task_id = 'push_var_from_task_a',
+        python_callable = push_var_from_task_a
+    )
+
+    get_var_from_task_a_task = PythonOperator(
+        task_id = 'get_var_from_task_a',
+        python_callable = get_var_from_task_a
+    )
+
+```
+
+- Specify the order of the task: push the variable, then retrieve it.
+
+```
+    push_var_from_task_a_task >> get_var_from_task_a_task
+```
+
+- In the DAG `alterra_xcom_examples_without_decorator` detail information, we can see there are task: `push_var_from_task_a` and `get_var_from_task_a`. Click on the green-squared status on task `get_var_from_task_a` to see the printed out.
+
+![xcom-console](./img/airflow__xcom_console.png)
+
+- The list of `xcom` can be seen in Admin > Xcom
+
+![list-xcom](./img/airflow__xcom_click.png)
+
+- Yeay! We have already learned about Airflow `xcom`. Now, we will improve the code using `@task` decorator or TaskFlow API. 
+
+- The `@task` decorator is highly recommended over the native `PythonOperator` to execute Python callables. See this [code](./docker/dags/xcom_example_decorator.py).
+
+```
+
+    @task
+    def push_var_from_task_a(ti=None):
+        ti.xcom_push(key='book_title', value='Data Engineering 101')
+    
+    @task
+    def get_var_from_task_a(ti=None):
+        book_title = ti.xcom_pull(task_ids='push_var_from_task_a', key='book_title')
+        print(f'print book_title variable from xcom: {book_title}')
+
+```
 
 
 ## TASKS
-- suppose we define a new task that push a variable to xcom, how to pull multiple values at once?
-
+1. Suppose we define a new task that push a variable to xcom.
+2. How to pull multiple values at once?
 
 ## Understanding `Hook` and `Connection` 
 
