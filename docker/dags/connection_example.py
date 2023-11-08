@@ -1,14 +1,14 @@
 from airflow import DAG
+from datetime import datetime
 from airflow.providers.http.operators.http import SimpleHttpOperator
 from airflow.operators.python import PythonOperator
 import pendulum
 
 with DAG(
-    dag_id = 'airflow_connection_example',
+    dag_id = 'alterra_connection_example',
     schedule=None,
-    start_date=pendulum.datetime(2022, 9, 1),
-    catchup=False,
-    default_args={"retries": 2}
+    start_date=datetime(2022, 10, 21),
+    catchup=False
 ) as dag:
     
     get_statistic = SimpleHttpOperator(
@@ -32,7 +32,7 @@ with DAG(
 
     def my_uri():
         from airflow.hooks.base import BaseHook
-        return BaseHook.get_connection("gender_api").get_uri()
+        print(f"Gender API URI ", BaseHook.get_connection("gender_api").get_uri())
 
     print_uri = PythonOperator(
         task_id = "print_uri",
