@@ -2,11 +2,11 @@
 
 1. [[Day-1] Introduction to Airflow: `DAG`, `Task`, `Operator`, `Variables` and `Xcom`](./day-1-airflow.md)
 
-2. [[Day-2] Introduction to Airflow: ](./day-2-airflow.md)
+2. [[Day-2] Introduction to Airflow: `Connection` and `Hook`](./day-2-airflow.md)
 
 4. [[Day-3] Schedule an End-to-End Data Pipeline](./day-3-airflow.md)
 
-5. [[Day-4]Schedule your data pipeline](./day-4-airflow.md)
+5. [[Day-4] Schedule an End-to-End Data Pipeline](./day-4-airflow.md)
 
 # [Day-1] Introduction to Airflow: `DAG`, `Task` and `Operator`
 
