@@ -49,15 +49,17 @@ In growing Big Data use cases, Airflow helps to maintain, monitor and stitch tog
     Whenever a DAG is triggered a DAGRun is created, so a DAGRun is an instance of the DAG with an execution timestamp. 
 
 - Operator
+
     Operator is a template or class for performing a specific task. If we want to execute a Python script, we need a `PythonOperator`. If we want to execute Bash command, we need `BashOperator`. There are [built-in operators](https://airflow.apache.org/docs/apache-airflow/stable/_api/airflow/operators/index.html), such as: `EmailOperator`, `EmptyOperator`, etc.
 
     We can also install more operators from [Provider packages](https://airflow.apache.org/docs/apache-airflow-providers/index.html) to further extend Airflow’s functionalities.
 
 
 - Task
+
     A task is an instantiation of an operator and simply can be thought of as a unit of work that is represented as a node in a DAG.
 
-    Whenever a Task is running, a task instance is created. A task instance belongs to DAGRuns, has an associated `execution_date`. Task instances go through various states, such as “running,” “success,” “failed,” “skipped,” “retry,” etc. Each task instance (and task) has a life cycle through which it moves from one state to another.
+    Whenever a Task is running, a task instance is created. A task instance belongs to DAGRuns and has an associated `execution_date`. Task instances go through various states, such as “running,” “success,” “failed,” “skipped,” “retry,” etc. Each task instance (and task) has a life cycle through which it moves from one state to another.
 
 ## Create our first DAG on Airflow 
 
@@ -89,7 +91,7 @@ In growing Big Data use cases, Airflow helps to maintain, monitor and stitch tog
 
     ```
         dag = DAG(
-                'hello_world', 
+                'alterra_hello_world', 
                 description='Hello World DAG',
                 schedule_interval='* * * * *',
                 start_date=datetime(2022, 10, 21), 
@@ -108,11 +110,11 @@ In growing Big Data use cases, Airflow helps to maintain, monitor and stitch tog
         operator_hello_world
     ```
 
-- Let's check it through Airflow dashboard. Find the name defined for our DAG `hello_world` on the list of DAGs.
+- Let's check it through Airflow dashboard. Find the name defined for our DAG `alterra_hello_world` on the list of DAGs.
 
 ![airflow-activate-dag](./img/airflow_activate_the_dag.png)
 
-- Click on the `hello_world` DAG, then we will be going through the detail page that shows a sequence of green-squared status meaning the DAG runs succesfully in a scheduled interval.
+- Click on the `alterra_hello_world` DAG, then we will be going through the detail page that shows a sequence of green-squared status meaning the DAG runs succesfully in a scheduled interval.
 
 ![airflow-graph-run](./img/airflow_graph_run.png)
 
@@ -140,7 +142,7 @@ class HelloWorldOperator(BaseOperator):
 
 ```
 
-- The line that contains `super` function is used to refer to the `BaseOperator` class or `HelloWorldOperator`
+- The line that contains `super` function is used to refer the `HelloWorldOperator` class over the parent class (`BaseOperator`).
 
 - The main logic of our operator is in the `execute` method. The `HelloWorldOperator` will simply print a message to a console.
 
@@ -179,7 +181,7 @@ There are several ways to store information in Airflow, such as:
 
 - Airflow `params` can be used to pass information that is specific to a DAG. 
 
-Now, we are going to learn about airflow `variables` and `xcom`.
+We are going to learn about airflow `variables` and `xcom`.
 
 ### `variables` in Airflow
 
