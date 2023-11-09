@@ -10,14 +10,6 @@ with DAG(
     start_date=datetime(2022, 10, 21),
     catchup=False
 ) as dag:
-    
-    def loadDataToPostgres():
-        pg_hook = PostgresHook(postgres_conn_id='pg_conn_id').get_conn()
-        curr = pg_hook.cursor("cursor")
-        with open('/opt/airflow/dags/sample.csv', 'r') as file:
-            next(file)
-            curr.copy_from(file, 'yellow_tripdata', sep=',')
-            pg_hook.commit()
 
     create_table_in_db_task = PostgresOperator(
         task_id = 'create_table_in_db',
@@ -44,8 +36,17 @@ with DAG(
         ')'),
         postgres_conn_id='pg_conn_id', 
         autocommit=True,
-        dag= dag
+        dag=dag
     )
+
+    def loadDataToPostgres():
+        pg_hook = PostgresHook(postgres_conn_id='pg_conn_id').get_conn()
+        curr = pg_hook.cursor("cursor")
+        with open('/opt/airflow/dags/sample.csv', 'r') as file:
+            next(file)
+            curr.copy_from(file, 'yellow_tripdata', sep=',')
+            pg_hook.commit()
+
 
     load_data_to_db_task = PythonOperator(
         task_id='load_data_to_db',

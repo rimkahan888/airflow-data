@@ -1,14 +1,12 @@
 # Outline
 
-1. [[Day-1] Introduction to Airflow: `DAG`, `Task` and `Operator`](#day-1-introduction-to-airflow-1)
+1. [[Day-1] Introduction to Airflow: `DAG`, `Task`, `Operator`, `Variables` and `Xcom`](./day-1-airflow.md)
 
-2. [[Day-2] Introduction to Airflow: ](#introduction-to-airflow-2-day-2)
+2. [[Day-2] Introduction to Airflow: ](./day-2-airflow.md)
 
-3. [[Day-3] Introduction to Airflow: ](#introduction-to-airflow-2-day-2)
+4. [[Day-3] Schedule an End-to-End Data Pipeline](./day-3-airflow.md)
 
-4. [[Day-4] Schedule an End-to-End Data Pipeline](#schedule-our-data-pipeline-day-3)
-
-5. [[Day-5]Schedule your data pipeline](#schedule-your-data-pipeline-day-4)
+5. [[Day-4]Schedule your data pipeline](./day-4-airflow.md)
 
 # [Day-1] Introduction to Airflow: `DAG`, `Task` and `Operator`
 
@@ -170,13 +168,6 @@ class HelloWorldOperator(BaseOperator):
 ```
     custom_operator_hello_task
 ```
-
-## [Day-1] TASK
-
-1. Create DAG that run in every 5 hours.
-2. [TBD] 
-
-# [Day-2] Introduction to Airflow: `variables` and `xcom`
 
 ## Define Airflow Variables with `variables` and `xcom`
 
@@ -363,162 +354,9 @@ Now, we are going to learn about airflow `variables` and `xcom`.
 
 ```
 
+## [Day-1] TASK
 
-## [Day-2] TASKS
-1. Suppose we define a new task that push a variable to xcom.
-2. How to pull multiple values at once?
+1. Create DAG that run in every 5 hours.
+2. Suppose we define a new task that push a variable to xcom.
+3. How to pull multiple values at once?
 
-
-# [Day-3] Introduction to Airflow: `Connection` and `Hook`
-
-## Understanding `Connection` and `Hook`
-
-### Airflow `connection`
-
-- Airflow `connection` makes the DAG be able to interact with an external tools (http, AWS, GCP or dbt service). `connection` stores a set of parameters, such as: `username`, `password`, `host`, other parameters with a unique `ConnectionID`.
-
-
-- There are 2 ways to define a `connection`: 
-
-    a) In the Airflow metadatabase (using the CLI or the Airflow dashboard). When you create a `connection` in the database, each time a task needs this `connection`, it requests the database. However, for the learning purpose, we are going to implement this method.
-
-    b) In an Environment Variables. With `connection` in Environment Variables, the task doesn't need to request the database. Airflow checks if the corresponding `connection` exists and grabs it without accessing the database. 
-
-- Now, we are going to create DAG that will call an API to predict gender based on name via [gender-api](https://gender-api.com/v2) using the defined `connection`, then print the result to the console. 
-
-- First of all, to be able to make a request call to [gender-api](https://gender-api.com/v2), we need to create account via email address, then activate it.
-
-![register-email-gender-api](./img/airflow__connection_register_gender_api.png)
-
-- Once our account is activated, we will see this page.
-
-![gender-api-page](./img/airflow__connection_gender_success_message.png)
-
-- Scroll down to the bottom then copy the generated authentication bearer token.
-
-![gender-api-bearer-token](./img/airflow__connection_gender_token.png)
-
-- Then, go to Airflow dashboard to add new connection.
-
-![add-new-connection](./img/airflow__connection_create.png)
-
-- Under the DAG, we will create some `tasks` that implement `SimpleHTTPOperator`. This is the `task` that make a `GET` request to endpoint `/statistic` using `http_conn_id="gender_api"`  as we define in `connection`. This endpoint will resolve the statistic of Gender API usage. The `log_response=True` prints out the API result to the console.
-
-```
-    get_statistic = SimpleHttpOperator(
-        task_id="get_statistic",
-        endpoint="/statistic",
-        method="GET",
-        http_conn_id="gender_api",
-        log_response=True,
-        dag=dag
-    )
-
-```
-
-- The next `task` makes a `POST` request to predict the gender of a given name. The `data` contains parameter suchs as: `country` and `first_name` that we want to predict. Please refer to [Gender-API documentation](https://gender-api.com/en/api-docs/v2) for a more detail explanation.
-
-```
-identify_name = SimpleHttpOperator(
-        task_id="post_name",
-        endpoint="/gender/by-first-name-multiple",
-        method="POST",
-        data='{"country": "ID", "locale": null, "ip": null, "first_name": "Musa"}',
-        http_conn_id="gender_api",
-        log_response=True,
-        dag=dag
-    )
-    
-```
-
-- The next task is to print the URI using `Hook`. We are going to explain about `hook` in the next part. The `my_uri` function is executed with `PythonOperator`.
-
-```
-    def my_uri():
-        from airflow.hooks.base import BaseHook
-        print(f"Gender API URI ", BaseHook.get_connection("gender_api").get_uri())
-
-    print_uri = PythonOperator(
-        task_id = "print_uri",
-        python_callable = my_uri
-    )
-
-```
-
-- Next, specify the order of the task 
-
-```
-
-    get_statistic >> identify_name >> print_uri
-
-```
-
-- Go to Airflow dashboard and execute the DAG to see the result.
-
-- `get_statistic` task console shows the statistic of Gender API usage. 
-
-![get-stats](./img/airflow__connection_get_stats.png)
-
-- `identify_name` task console shows the name prediction result.
-
-![predict_name](./img/airflow__connection_post_name.png)
-
-- `print_uri` task console shows the URI 
-
-![print_uri_hook](./img/airflow__connection_print_uri.png)
-
-
-### Airflow `Hook`
-- A `hook` is an abstraction of a specific API that allows Airflow to interact with an external system. 
-
-- To use a `hook`, you typically need a `conn_id` from `Connections` to connect with an external system. For example, the `PostgreHook` automatically looks for the Connection with a `conn_id` of postgres_default if you don’t pass one in.
-
-- Some built-in hook are: `HTTPHook`, `S3Hook`, `PostgresHook`, `MysqlHook`, `SlackHook`, etc.
-
-- The difference from `operator` is, `operator` provides a way to create `task` that may or may not communicate with some external services, while `hook` are reusable block that manage interaction with external services.
-
-- Example of `hook`: 
-
-- [TBD] insert data to postgresql with `PostgresHook`
-
-
-
-## [Day-3] TASKS
-- Create data pipeline that predict multiple names from gender-api with SimpleHTTPOperator 
-- Load the prediction result to table `gender_name_prediction` postgresql with PostgresHook
-
-# [Day-4] Schedule an End-to-End Data Pipeline
-
-In this section, we are going to implement scheduling for our ETL pipeline that we have learned.
-
-How to decompose dag based on its best practice: https://docs.astronomer.io/learn/dag-best-practices
-
-## Understand how to integrate a data pipeline into airflow
-
-https://www.freecodecamp.org/news/orchestrate-an-etl-data-pipeline-with-apache-airflow/
-
-Setup a DAG script
-- Prepare the dataset (some CSV files or URL)
-- Create code to ingest the dataset to our datawarehouse with python
-    1. define when the DAG will be run, start_date
-    2. define the interval of the DAG
-- Setup Postgresql DB Connection
-- Define tasks in a DAG : 
-    1. task-1: define empty operator
-    2. task-2: create connection and table in postgresql with PostgresOperator
-    3. task-3: ingest data from file with PythonOperator
-    4. task-4: command to move data from Postgresql to Citus with Airbyte
-    5. task-5: dbt command to transform data with DbtOperator, BashOperator or SSHOperator
-- Create dependencies between tasks
-- Test the workflows
-
-## Scheduling ingestion code with PythonOperator
-
-
-# [Day-5] Schedule an End-to-End Data Pipeline
-
-## Scheduling dbt code with BashOperator
-
-## Send success/failed notification to email
-
-## [TASK] TBD
