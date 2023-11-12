@@ -3,7 +3,6 @@
 
 In this section, we are going to implement scheduling for our ETL pipeline that we have learned.
 
-How to decompose dag based on its best practice: https://docs.astronomer.io/learn/dag-best-practices
 
 ## Understand how to integrate a data pipeline into airflow
 
@@ -25,4 +24,24 @@ Setup a DAG script
 - Test the workflows
 
 ## Scheduling ingestion code with PythonOperator
+
+
+### Setup dbt
+Steps: 
+
+```
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+to setup dbt on local machine, review material about [dbt](https://github.com/Immersive-DataEngineer-Resource/dbt-demo).
+
+- setup profiles.yml
+
+
+
+How to decompose dag based on its best practice: https://docs.astronomer.io/learn/dag-best-practices
+
+
 
