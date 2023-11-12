@@ -1,6 +1,7 @@
 from airflow import DAG
 from datetime import datetime
 from airflow.operators.postgres_operator import PostgresOperator
+from airflow.operators.dummy_operator import DummyOperator
 from airflow.hooks.postgres_hook import PostgresHook
 from airflow.operators.python import PythonOperator
 
@@ -10,6 +11,8 @@ with DAG(
     start_date=datetime(2022, 10, 21),
     catchup=False
 ) as dag:
+
+    start = DummyOperator(task_id="start")
 
     create_table_in_db_task = PostgresOperator(
         task_id = 'create_table_in_db',
@@ -29,7 +32,7 @@ with DAG(
         dag=dag
     )
 
-    # extract data from url (gz)
+    # extract data from url (gz), based on execution date (1 hari)
     def extract():
         import pandas as pd
         import json
@@ -61,7 +64,9 @@ with DAG(
             for chunk in reader:
                 df = pd.DataFrame(chunk)
                 
+                # TODO: fillna
                 df.dropna(inplace=True)
+                
 
                 df["id"] = df["id"].astype("Int64")
                 df["type"] = df["type"].astype("string")
@@ -82,5 +87,12 @@ with DAG(
         dag=dag
     )
 
+    # remove duplication with dbt, run models with dbt
 
-    create_table_in_db_task >> load_data_to_db_task
+    # send notif to email
+    # https://pawankg.medium.com/enhancing-airflow-task-monitoring-with-email-notifications-869062fb6c60
+
+    end = DummyOperator(task_id="end")
+
+
+    start >> create_table_in_db_task >> load_data_to_db_task >> end

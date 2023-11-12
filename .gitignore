@@ -4,3 +4,4 @@ docker/plugins/operators/__pycache__
 *.cfg
 .DS_Store
 .venv
+logs/*
