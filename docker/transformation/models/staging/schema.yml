@@ -1,0 +1,24 @@
+version: 2
+
+sources: 
+  - name: staging
+    database: airflow # database
+    schema: public # schema
+    tables: 
+      - name: github_data
+  
+models:
+  - name: stg_github_data
+    description: "data in staging layer is guaranteed to not redundant and not containing any bot user's activities"
+    columns:
+      - name: id
+        description: "The primary key for this table"
+        tests:
+          - unique
+      - name: type
+      - name: actor
+      - name: repo
+      - name: payload
+      - name: public
+      - name: created_at
+      - name: org

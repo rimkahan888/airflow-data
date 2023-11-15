@@ -4,9 +4,15 @@ from airflow.operators.postgres_operator import PostgresOperator
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.hooks.postgres_hook import PostgresHook
 from airflow.operators.python import PythonOperator
+from airflow.operators.docker_operator import DockerOperator
+from airflow.operators.bash import BashOperator
+from docker.types import Mount
+
+default_args = {'owner' : 'airflow'}
 
 with DAG(
     dag_id = 'alterra_integrate_all',
+    default_args=default_args,
     schedule=None,
     start_date=datetime(2022, 10, 21),
     catchup=False
@@ -87,6 +93,80 @@ with DAG(
         dag=dag
     )
 
+    local_path = "/Users/dewi.oktaviani/Documents/personal-github/airflow-data/docker"
+    
+    run_dbt_cmd = DockerOperator(
+        task_id='run_dbt_cmd',
+        image='dbt_in_docker',
+        container_name='dbt_one_run',
+        api_version='auto',
+        auto_remove=True,
+        command="bash -c 'dbt debug'",
+        docker_url="tcp://docker-proxy:2375",
+        network_mode="bridge",
+        mounts = [
+            Mount(
+                source=f"{local_path}/transformation", 
+                target="/usr/app", 
+                type="bind"
+            ),
+            Mount(
+                source=f"{local_path}/transformation/profiles",
+                target="/root/.dbt",
+                type="bind"
+            )
+        ],
+        mount_tmp_dir = False
+    )
+
+    dbt_run_cmd = DockerOperator(
+        task_id='dbt_run_cmd',
+        image='dbt_in_docker',
+        container_name='dbt_one_run',
+        api_version='auto',
+        auto_remove=True,
+        command="bash -c 'dbt --no-partial-parse run'",
+        docker_url="tcp://docker-proxy:2375",
+        network_mode="bridge",
+        mounts = [
+            Mount(
+                source=f"{local_path}/transformation", 
+                target="/usr/app", 
+                type="bind"
+            ),
+            Mount(
+                source=f"{local_path}/transformation/profiles",
+                target="/root/.dbt",
+                type="bind"
+            )
+        ],
+        mount_tmp_dir = False
+    )
+
+    dbt_run_staging_cmd = DockerOperator(
+        task_id='dbt_run_staging_cmd',
+        image='dbt_in_docker',
+        container_name='dbt_one_run',
+        api_version='auto',
+        auto_remove=True,
+        command="bash -c 'dbt --no-partial-parse run'",
+        docker_url="tcp://docker-proxy:2375",
+        network_mode="bridge",
+        mounts = [
+            Mount(
+                source=f"{local_path}/transformation", 
+                target="/usr/app", 
+                type="bind"
+            ),
+            Mount(
+                source=f"{local_path}/transformation/profiles",
+                target="/root/.dbt",
+                type="bind"
+            )
+        ],
+        mount_tmp_dir = False
+    )
+
     # remove duplication with dbt, run models with dbt
 
     # send notif to email
@@ -95,4 +175,4 @@ with DAG(
     end = DummyOperator(task_id="end")
 
 
-    start >> create_table_in_db_task >> load_data_to_db_task >> end
+    start >> create_table_in_db_task >> load_data_to_db_task >> run_dbt_cmd >> dbt_run_cmd >> dbt_run_staging_cmd >> end

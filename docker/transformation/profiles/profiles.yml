@@ -1,0 +1,14 @@
+transformation:
+  outputs:
+
+    dev:
+      type: postgres
+      threads: 1
+      host: host.docker.internal
+      port: 5432
+      user: airflow
+      pass: airflow
+      dbname: airflow
+      schema: public
+
+  target: dev
