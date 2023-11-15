@@ -7,6 +7,7 @@ from airflow.operators.python import PythonOperator
 from airflow.operators.docker_operator import DockerOperator
 from airflow.operators.bash import BashOperator
 from docker.types import Mount
+from airflow.operators.email_operator import EmailOperator
 
 default_args = {'owner' : 'airflow'}
 
@@ -166,13 +167,21 @@ with DAG(
         ],
         mount_tmp_dir = False
     )
-
     # remove duplication with dbt, run models with dbt
 
     # send notif to email
     # https://pawankg.medium.com/enhancing-airflow-task-monitoring-with-email-notifications-869062fb6c60
 
+    send_email = EmailOperator(
+        task_id='send_email',
+        to='dewi.oktaviani@tiptip.tv',
+        subject='Notification from Alterra DE Course',
+        html_content='This is a test email from Alterra DE Course. Happy Learning!',
+        dag=dag
+    )
+
+
     end = DummyOperator(task_id="end")
 
 
-    start >> create_table_in_db_task >> load_data_to_db_task >> run_dbt_cmd >> dbt_run_cmd >> dbt_run_staging_cmd >> end
+    start >> create_table_in_db_task >> load_data_to_db_task >> run_dbt_cmd >> dbt_run_cmd >> dbt_run_staging_cmd >> send_email >> end

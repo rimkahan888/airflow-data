@@ -6,3 +6,4 @@ docker/plugins/operators/__pycache__
 .venv
 logs/*
 docker/dags/logs/
+docker/*.env
