@@ -28,16 +28,19 @@ Setup a DAG script
 
 
 
-### Setup dbt
-Steps: 
+### Setup dbt in a Dockerfile
+
+- dbt in [Dockerfile](./docker/Dockerfile)
+
+- to setup dbt directory on local machine, review material about [dbt](https://github.com/Immersive-DataEngineer-Resource/dbt-demo).
 
 ```
 python -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
-```
+pip install dbt-postgres # Note: DBT has many DBMS adapter
 
-to setup dbt on local machine, review material about [dbt](https://github.com/Immersive-DataEngineer-Resource/dbt-demo).
+```
+- initiate a dbt project
 
 ```
 dbt init transformation
@@ -46,8 +49,30 @@ dbt init transformation
 - setup profiles.yml
 
 ```
-mkdir dbt-profiles
-touch dbt-profiles/profiles.yml
+mkdir transformation/profiles
+touch transformation/profiles/profiles.yml
+```
+
+- fill this to profiles.yml
+
+```
+
+transformation:
+  outputs:
+
+    dev:
+      type: postgres
+      threads: 1
+      host: host.docker.internal
+      port: 5432
+      user: airflow
+      pass: airflow
+      dbname: airflow
+      schema: public
+
+  target: dev
+
+
 ```
 
 - create a file named dbt.env to store environment variable for DBT
@@ -61,8 +86,6 @@ export DBT_PROFILES_DIR=$(pwd)/dbt-profiles
 ```
 dbt debug --project-dir ./transformation
 ```
-
-How to decompose dag based on its best practice: https://docs.astronomer.io/learn/dag-best-practices
 
 
 

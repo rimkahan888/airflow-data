@@ -170,8 +170,6 @@ with DAG(
     # remove duplication with dbt, run models with dbt
 
     # send notif to email
-    # https://pawankg.medium.com/enhancing-airflow-task-monitoring-with-email-notifications-869062fb6c60
-
     send_email = EmailOperator(
         task_id='send_email',
         to='dewi.oktaviani@tiptip.tv',
