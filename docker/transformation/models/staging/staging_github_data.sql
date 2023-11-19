@@ -20,14 +20,6 @@ WITH ranked AS (
         ORDER BY created_at DESC NULLS LAST
         ) AS __rank
     FROM {{ source('staging', 'github_data') }}
-
-  {% if is_incremental() %}
-    WHERE created_at > 
-      (
-        SELECT MAX(created_at)
-        FROM {{ this }}
-      )
-  {% endif %}
 )
 SELECT id, 
     type, 

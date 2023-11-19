@@ -12,7 +12,7 @@ from airflow.operators.email_operator import EmailOperator
 default_args = {'owner' : 'airflow'}
 
 with DAG(
-    dag_id = 'alterra_integrate_all',
+    dag_id = 'alterra_integrate_all_part2',
     default_args=default_args,
     schedule=None,
     start_date=datetime(2022, 10, 21),
@@ -87,10 +87,62 @@ with DAG(
         dag=dag
     )
 
+    # remove duplication with dbt, run models with dbt
+
+    local_path = "/Users/dewi.oktaviani/Documents/personal-github/airflow-data/docker"
+    
+    dbt_debug_cmd = DockerOperator(
+        task_id='dbt_debug_cmd',
+        image='dbt_in_docker_compose',
+        container_name='dbt_container',
+        api_version='auto',
+        auto_remove=True,
+        command="bash -c 'dbt debug'",
+        docker_url="tcp://docker-proxy:2375",
+        network_mode="bridge",
+        mounts = [
+            Mount(
+                source=f"{local_path}/transformation", 
+                target="/usr/app", 
+                type="bind"
+            ),
+            Mount(
+                source=f"{local_path}/transformation/profiles",
+                target="/root/.dbt",
+                type="bind"
+            )
+        ],
+        mount_tmp_dir = False
+    )
+
+    dbt_run_cmd = DockerOperator(
+        task_id='dbt_run_cmd',
+        image='dbt_in_docker_compose',
+        container_name='dbt_container',
+        api_version='auto',
+        auto_remove=True,
+        command="bash -c 'dbt --no-partial-parse run'",
+        docker_url="tcp://docker-proxy:2375",
+        network_mode="bridge",
+        mounts = [
+            Mount(
+                source=f"{local_path}/transformation", 
+                target="/usr/app", 
+                type="bind"
+            ),
+            Mount(
+                source=f"{local_path}/transformation/profiles",
+                target="/root/.dbt",
+                type="bind"
+            )
+        ],
+        mount_tmp_dir = False
+    )
+
     # NEXT
-    # part-2: remove duplication with dbt, run models with dbt
     # part-3: send notif to email
 
     end = DummyOperator(task_id="end")
 
-    start >> create_table_in_db_task >> load_data_to_db_task >> end
+
+    start >> create_table_in_db_task >> load_data_to_db_task >> dbt_debug_cmd >> dbt_run_cmd >> end 

@@ -87,6 +87,7 @@ x-airflow-common:
     - ${AIRFLOW_PROJ_DIR:-.}/logs:/opt/airflow/logs
     - ${AIRFLOW_PROJ_DIR:-.}/config:/opt/airflow/config
     - ${AIRFLOW_PROJ_DIR:-.}/plugins:/opt/airflow/plugins
+    - ${AIRFLOW_PROJ_DIR:-.}/config/airflow.cfg:/usr/local/airflow/airflow.cfg
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
     &airflow-common-depends-on
@@ -315,22 +316,10 @@ services:
       - "2376:2375"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ${PWD}/dbt_demo:/dbt_demo
-      - ${PWD}/dbt_demo/profiles:/dbt_demo/profiles
 
-  # dbt:
-  #   container_name: dbt
-  #   build: .
-  #   image: dbt-with-airflow
-  #   command: "TCP4-LISTEN:2375,fork,reuseaddr UNIX-CONNECT:/var/run/docker.sock"
-  #   ports:
-  #     - "2376:2375"
-  #   volumes:
-  #     - /var/run/docker.sock:/var/run/docker.sock
-  #     - ../transformation/:/usr/src/dbt
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
+  dbt:
+    build: .
+    image: dbt_in_docker_compose
 
 volumes:
   postgres-db-volume:
