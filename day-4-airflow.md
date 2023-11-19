@@ -90,9 +90,10 @@
 - Setup Google app passwords security [here](https://security.google.com/settings/security/apppasswords)
     - Login to our gmail account
     - Type a new app name, then click on "Create"
-    - Copy the generated password for the new app, then paste it on [airflow.env](./docker/airflow.env). 
+    - Rename file airflow.env.template to airflow.env
+    - Copy the generated password for the new app, then paste it on airflow.env 
     ```
-    export AIRFLOW__SMTP__SMTP_PASSWORD = 'generated app password'
+    export AIRFLOW__SMTP__SMTP_PASSWORD = 'generated-app-password'
     ```
     
     ![](./img/airflow__app_password_generated.png)
