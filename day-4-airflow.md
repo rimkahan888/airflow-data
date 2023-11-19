@@ -98,7 +98,7 @@
     
     ![](./img/airflow__app_password_generated.png)
     
-    - After this lessons, pleasewe could delete the password for safety reason.
+    - After this lessons, please delete the password for safety reason.
 
 - setup SMTP config on [docker-compose.yml](./docker/docker-compose.yaml), service `x-airflow-common` > `environment`
 
