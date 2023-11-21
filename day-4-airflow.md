@@ -13,7 +13,7 @@
 
 - To handle the `DockerOperator`’s permissions, we’ll need to create a proxy container in the docker-compose.yaml file. This is a secure way to handle the issue of permissions to /var/run/docker.sock file.
 
-![](./img/airflow__docker_proxy_.jpg)
+![](./img/airflow__docker_proxy.png)
 
 ```
   docker-proxy:
@@ -68,12 +68,13 @@
 
 ```
 
-    what actually DockerOperator do:
+-  what actually DockerOperator do:
 
-    ![](./img/airflow__dockerOperator.jpg)
 
-- 
-```
+    ![](./img/airflow__dockerOperator.png)
+
+
+``` 
     start >> create_table_in_db_task >> load_data_to_db_task >> dbt_debug_cmd >> dbt_run_cmd >> end 
 
 ```

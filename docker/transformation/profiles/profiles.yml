@@ -3,7 +3,8 @@ transformation:
     dev:
       type: postgres
       threads: 1
-      host: localhost
+      # rename
+      host: host.docker.internal
       port: 5432
       user: airflow
       pass: airflow
