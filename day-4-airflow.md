@@ -94,6 +94,7 @@
     - Rename file airflow.env.template to airflow.env
     - Copy the generated password for the new app, then paste it on airflow.env 
     ```
+    export AIRFLOW__SMTP__SMTP_USER = 'your-gmail-account'
     export AIRFLOW__SMTP__SMTP_PASSWORD = 'generated-app-password'
     ```
     
