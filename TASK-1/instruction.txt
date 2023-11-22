@@ -1,0 +1,2 @@
+Instruction for Task Day-1
+- Upload your python script and elaborate your answer.

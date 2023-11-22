@@ -1,0 +1,3 @@
+Instruction for Task Day-2
+- Upload your python script
+- Screenshot the result on Airflow dashboard and the number of rows from DBeaver, then upload the result's screenshot.
